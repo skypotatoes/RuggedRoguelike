@@ -220,10 +220,10 @@ function spawnSoldier(x, y, name) {//this function will spawn in a single soldie
       //console.log(gameObject.squadMates[name].soldierAngle )
       //console.log(diff)
       if (diff < 0) {
-        gameObject.squadMates[name].angle += PI / 180;
+        gameObject.squadMates[name].angle += 8*PI / 180;
       };
       if (diff > 0) {
-        gameObject.squadMates[name].angle -= PI / 180;
+        gameObject.squadMates[name].angle -= 8*PI / 180;
       };
       // console.log("soldier x,y: "+soldier.x+","+soldier.y)
       // console.log("waypoint x,y: "+waypoint.x+","+waypoint.y)
@@ -234,7 +234,7 @@ function spawnSoldier(x, y, name) {//this function will spawn in a single soldie
       //console.log(gameObject.squadMates[name].x)
 
 
-      if (hyp > 20) {  // this if statements make them stop when reaching waypoint
+      if (hyp > 50) {  // this if statements make them stop when reaching waypoint
         gameObject.squadMates[name].x += cos(angle);
         gameObject.squadMates[name].y += sin(angle);
       }
