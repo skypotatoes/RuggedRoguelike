@@ -136,7 +136,7 @@ const Soldier = class {
 
 
     //start of perception
-    let perceptionArray = [];
+    this.perceptionArray = [];
     // To be perceived by the soldier, an object must have a distance d < bubbleRadius
     //first get a list of all other things in the world array 
 
