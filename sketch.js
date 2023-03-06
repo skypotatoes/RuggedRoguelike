@@ -87,20 +87,26 @@ const Soldier = class {
       y + (radius * sin(angle))
     );
     pop(); //end of orientation line
+ 
+      if(gameObject.selected.includes(this)){
 
-    push(); // a perception bubble drawn around the soldier
-    noFill();
-    stroke(green);
-    circle(x, y, perceptionBubble * 2)
-    pop();
+        push(); // a perception bubble drawn around the soldier
+        noFill();
+        stroke(green);
+        circle(x, y, perceptionBubble * 2)
+        pop();
+    
+        push();
+        stroke(blue); // draws a blue line between bots when they are in the perceptionArray
+        for (let i = 0; i < this.perceptionArray.length; i++) {
+          let other = this.perceptionArray[i];
+          line(x, y, other.x, other.y)// 
+        }
+        pop();
 
-    push();
-    stroke(blue); // draws a blue line between bots when they are in the perceptionArray
-    for (let i = 0; i < this.perceptionArray.length; i++) {
-      let other = this.perceptionArray[i];
-      line(x, y, other.x, other.y)// 
-    }
-    pop();
+      }
+
+
   }
   behaviour = function () { //--->START OF SOLDIER BEHAVIOUR  <---\\
 
