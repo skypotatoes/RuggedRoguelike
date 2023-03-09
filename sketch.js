@@ -17,7 +17,7 @@ const neutrals = yellow;
 let waypointTimestamp;
 
 let cnv;
-let radius = 25 //the size of the soldier
+let radius = 10 //the size of the soldier
 let perceptionBubble = 200;
 let squadSize = 5;
 
@@ -31,6 +31,35 @@ gameObject.prevWaypointX = 0;
 gameObject.prevWaypointY = 0;
 
 
+const Bullet = class {
+  constructor(x,y,angle){
+    this.x = x,
+    this.y = y,
+    this.angle = angle;
+    this.radius = 2.5;
+    this.life=0;
+  };
+  faction = 'projectile';
+  draw = function(){
+    push();
+    fill('black')
+    circle(this.x, this.y,2*this.radius)
+    pop();
+  }
+  behaviour = function(){
+    this.life ++
+    this.x += cos(this.angle)*5;
+    this.y += sin(this.angle)*5;
+    if (this.life>35){
+     
+    gameObject.world.splice(gameObject.world.indexOf(this),1)
+    
+
+
+    }
+  }
+}
+
 const Soldier = class {
   constructor(x, y, name, faction) {
     this.x = x,
@@ -41,6 +70,7 @@ const Soldier = class {
     this.theta = 0;
 
   }
+  health = 100;
   gunAngle = 0;
   angleToEnemy = 0;
   radius = radius;
@@ -48,9 +78,8 @@ const Soldier = class {
   perceptionArray = [];
   waypointX = this.x;
   waypointY = this.y;
+  shootCooldown = 0;
   draw = function () {
-
-
     let perceptionBubble = this.perceptionBubble;
     let x = this.x
     let y = this.y
@@ -80,14 +109,14 @@ const Soldier = class {
     noFill();
     pop(); //end of green circle
 
-    push(); //draws the orientation line, dependent on this.angle
-    stroke(blue);
-    line(x,
-      y,
-      x + (radius * cos(this.angle)),
-      y + (radius * sin(this.angle))
-    );
-    pop(); //end of orientation line
+    // push(); //draws the orientation line, dependent on this.angle
+    // stroke(blue);
+    // line(x,
+    //   y,
+    //   x + (radius * cos(this.angle)),
+    //   y + (radius * sin(this.angle))
+    // );
+    // pop(); //end of orientation line
 
     push(); //draws the gun line
     strokeWeight(2);
@@ -137,11 +166,10 @@ const Soldier = class {
       // pop();
 
     }
-
-
   }
   behaviour = function () { //--->START OF SOLDIER BEHAVIOUR  <---\\
-
+    this.shootCooldown -=1;
+    if (this.shootCooldown<0){this.shootCooldown = 0};
     let distanceToClick = dist(this.x, this.y, gameObject.waypointX, gameObject.waypointY)
     // console.log(distanceToClick)
     let selectedArray = gameObject.selected
@@ -197,13 +225,18 @@ const Soldier = class {
         }
 
         //collision detection:
-        if (distance <= 2 * radius) {
+        if (distance <= this.radius + other.radius) {
           this.x -= cos(theta);
           this.y += sin(theta);
+
+          if (other.faction === 'projectile'){
+            gameObject.world.splice(gameObject.world.indexOf(other),1)
+            this.health -= 50;
+          }
         }
+        
 
-
-        if (other.faction !== this.faction) {
+        if (other.faction !== 'projectile'){if (other.faction !== this.faction) {
           if (!this.closestEnemy) {
             this.closestEnemy = (other)
           }
@@ -215,7 +248,9 @@ const Soldier = class {
             }
           }
         }
+}
 
+        
         if (this.closestEnemy) {
           let enemy = this.closestEnemy
           let adj = enemy.x - this.x;
@@ -256,6 +291,9 @@ const Soldier = class {
             this.gunAngle += PI/180
           }
 
+          if (this.health <=0 ){
+            gameObject.world.splice(gameObject.world.indexOf(this),1)
+          }
 
         }
       }
@@ -303,7 +341,21 @@ const Soldier = class {
     };
 
 
+
+    let firingAngle = this.gunAngle - this.angleToEnemy
+    if (this.closestEnemy !== 0 && 
+      Math.abs(firingAngle) < PI/8 && 
+      this.shootCooldown ===0){
+    this.shootCooldown = 50
+   this.shoot()
+    }
+
+
   }//end of soldier behaviour function
+  shoot= function(){
+    const bullet = new Bullet(this.x+(this.radius+5)*cos(this.gunAngle), this.y+(this.radius+5)*sin(this.gunAngle), this.gunAngle)
+    gameObject.world.push(bullet)
+  }
 }//end of soldier class
 //--->END OF SOLDIER  <---\\
 
@@ -382,8 +434,15 @@ function draw() {
   // //decide here which game objects you want to render
 
   for (let i = 0; i < gameObject.world.length; i++) {
-    gameObject.world[i].behaviour();
-    gameObject.world[i].draw();
+    
+    if (gameObject.world[i]){
+       gameObject.world[i].draw();
+      gameObject.world[i].behaviour();
+      
+
+      
+    }
+  
   }
   waypoint.draw();
 
