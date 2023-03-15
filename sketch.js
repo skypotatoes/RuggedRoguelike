@@ -32,28 +32,28 @@ gameObject.prevWaypointY = 0;
 
 
 const Bullet = class {
-  constructor(x,y,angle){
+  constructor(x, y, angle) {
     this.x = x,
-    this.y = y,
-    this.angle = angle;
+      this.y = y,
+      this.angle = angle;
     this.radius = 2.5;
-    this.life=0;
+    this.life = 0;
   };
   faction = 'projectile';
-  draw = function(){
+  draw = function () {
     push();
     fill('black')
-    circle(this.x, this.y,2*this.radius)
+    circle(this.x, this.y, 2 * this.radius)
     pop();
   }
-  behaviour = function(){
-    this.life ++
-    this.x += cos(this.angle)*5;
-    this.y += sin(this.angle)*5;
-    if (this.life>35){
-     
-    gameObject.world.splice(gameObject.world.indexOf(this),1)
-    
+  behaviour = function () {
+    this.life++
+    this.x += cos(this.angle) * 5;
+    this.y += sin(this.angle) * 5;
+    if (this.life > 35) {
+
+      gameObject.world.splice(gameObject.world.indexOf(this), 1)
+
 
 
     }
@@ -160,7 +160,7 @@ const Soldier = class {
       //     y,
       //     x + distance * cos(angleToEnemy),
       //     y + distance * sin(angleToEnemy))
-      
+
 
       // }
       // pop();
@@ -168,11 +168,14 @@ const Soldier = class {
     }
   }
   behaviour = function () { //--->START OF SOLDIER BEHAVIOUR  <---\\
-    this.shootCooldown -=1;
-    if (this.shootCooldown<0){this.shootCooldown = 0};
+    this.shootCooldown -= 1;
+    if (this.shootCooldown < 0) { this.shootCooldown = 0 };
     let distanceToClick = dist(this.x, this.y, gameObject.waypointX, gameObject.waypointY)
     // console.log(distanceToClick)
     let selectedArray = gameObject.selected
+
+
+
     if (distanceToClick <= radius && !selectedArray.includes(this)) {
       if (selectedArray.length > 0) {
         // console.log('soldier '+this.name+' selected')
@@ -191,9 +194,15 @@ const Soldier = class {
 
     }
 
+
+    // if (mouseIsPressed && mouseButton === RIGHT) {
+    //   gameObject.selected = []
+    // }
+
+
     if (distanceToClick > radius && gameObject.selected.includes(this)) {
-      this.waypointX = gameObject.waypointX;
-      this.waypointY = gameObject.waypointY
+      //this.waypointX = gameObject.waypointX;
+      //this.waypointY = gameObject.waypointY
     };
 
     //start of perception
@@ -229,41 +238,42 @@ const Soldier = class {
           this.x -= cos(theta);
           this.y += sin(theta);
 
-          if (other.faction === 'projectile'){
-            gameObject.world.splice(gameObject.world.indexOf(other),1)
+          if (other.faction === 'projectile') {
+            gameObject.world.splice(gameObject.world.indexOf(other), 1)
             this.health -= 50;
           }
         }
-        
 
-        if (other.faction !== 'projectile'){if (other.faction !== this.faction) {
-          if (!this.closestEnemy) {
-            this.closestEnemy = (other)
-          }
-          if (this.closestEnemy) {
-            const distanceToOther = dist(this.x, this.y, other.x, other.y);
-            const distToCurrentClosest = dist(this.x, this.y, this.closestEnemy.x, this.closestEnemy.y)
-            if (distanceToOther < distToCurrentClosest) {
+
+        if (other.faction !== 'projectile') {
+          if (other.faction !== this.faction) {
+            if (!this.closestEnemy) {
               this.closestEnemy = (other)
+            }
+            if (this.closestEnemy) {
+              const distanceToOther = dist(this.x, this.y, other.x, other.y);
+              const distToCurrentClosest = dist(this.x, this.y, this.closestEnemy.x, this.closestEnemy.y)
+              if (distanceToOther < distToCurrentClosest) {
+                this.closestEnemy = (other)
+              }
             }
           }
         }
-}
 
-        
+
         if (this.closestEnemy) {
           let enemy = this.closestEnemy
           let adj = enemy.x - this.x;
           let opp = enemy.y - this.y;
           let hyp = dist(this.x, this.y, enemy.x, enemy.y)
           if (hyp === 0) { this.angleToEnemy = 0 } else { this.angleToEnemy = Math.asin(opp / hyp) }
-          
-          
+
+
           if (adj < 0) {  // ah, fudge
             this.angleToEnemy = -this.angleToEnemy - PI;
             //smallestAngle = -smallestAngle;
           } //this corrects for x axis 
-          
+
           let ang = this.gunAngle - this.angleToEnemy
           let angPlus2pi = ang + 2 * PI;
           let angMinus2pi = ang - 2 * PI;
@@ -271,7 +281,7 @@ const Soldier = class {
           let smallestAngle = pickSmallestByMagnitude(ang, angPlus2pi, angMinus2pi);
           // const diff = diffUsual
 
-        
+
           //  if (diff < 0) {
           //    this.gunAngle -= 1 * PI / 180;
           //  };
@@ -284,15 +294,15 @@ const Soldier = class {
           //   //smallestAngle = -smallestAngle;
           // } //this corrects for x axis 
 
-          if (smallestAngle > 0){
-            this.gunAngle -= PI/180
+          if (smallestAngle > 0) {
+            this.gunAngle -= PI / 180
           }
-          if (smallestAngle < 0 ){
-            this.gunAngle += PI/180
+          if (smallestAngle < 0) {
+            this.gunAngle += PI / 180
           }
 
-          if (this.health <=0 ){
-            gameObject.world.splice(gameObject.world.indexOf(this),1)
+          if (this.health <= 0) {
+            gameObject.world.splice(gameObject.world.indexOf(this), 1)
           }
 
         }
@@ -343,17 +353,27 @@ const Soldier = class {
 
 
     let firingAngle = this.gunAngle - this.angleToEnemy
-    if (this.closestEnemy !== 0 && 
-      Math.abs(firingAngle) < PI/8 && 
-      this.shootCooldown ===0){
-    this.shootCooldown = 50
-   this.shoot()
+    let fAnglePlus2PI = firingAngle + 2 * PI
+    let fAngleMinus2PI = firingAngle - 2 * PI
+    let smlstFAngle = pickSmallestByMagnitude(firingAngle, fAngleMinus2PI, fAnglePlus2PI)
+
+    if (this.closestEnemy !== 0 &&
+      Math.abs(smlstFAngle) < PI / 8 &&
+      this.shootCooldown === 0) {
+      this.shootCooldown = 50
+      this.shoot()
     }
 
 
+    if (this.faction === 'enemy') {
+      //place basic enemy ai here
+    }
+
+
+
   }//end of soldier behaviour function
-  shoot= function(){
-    const bullet = new Bullet(this.x+(this.radius+5)*cos(this.gunAngle), this.y+(this.radius+5)*sin(this.gunAngle), this.gunAngle)
+  shoot = function () {
+    const bullet = new Bullet(this.x + (this.radius + 5) * cos(this.gunAngle), this.y + (this.radius + 5) * sin(this.gunAngle), this.gunAngle)
     gameObject.world.push(bullet)
   }
 }//end of soldier class
@@ -380,13 +400,18 @@ function spawnSquad(num, x, y, faction) { //spawns a squad of num soldiers on th
 }
 
 function setup() {
+  for (let element of document.getElementsByClassName("p5Canvas")) {
+    element.addEventListener("contextmenu", (e) => e.preventDefault());
+  } // thank you, bluelhf !!! see --> https://stackoverflow.com/questions/60853612/p5-js-on-right-mouse-click-shows-the-browser-context-menu-and-not-the-drawing-fu
+
   cnv = createCanvas(width, height)
-  cnv.mouseClicked(getWaypoint);
+  cnv.mousePressed(getWaypoint);
+
 
   spawnSquad(squadSize, width / 2, height - 250, 'friendly');
 
   spawnSquad(squadSize, width / 2, 0, 'enemy');
-  //console.log(gameObject)
+
 
 };
 
@@ -427,37 +452,83 @@ function draw() {
   background(bgColour);
 
 
-
-  // console.log(gameObject)
-  //let squadMates = gameObject.squadMates;
-
   // //decide here which game objects you want to render
-
   for (let i = 0; i < gameObject.world.length; i++) {
-    
-    if (gameObject.world[i]){
-       gameObject.world[i].draw();
+    if (gameObject.world[i]) {
+      gameObject.world[i].draw();
       gameObject.world[i].behaviour();
-      
-
-      
     }
-  
   }
   waypoint.draw();
 
 }; //end of draw loop
 
-function mouseClicked() {
 
+// function mouseReleased(){
+//   gameObject.dragging = false;
+// }
+
+function mousePressed() {
+
+  return false;
+}
+
+function mouseDragged() {
+  gameObject.dragging = true;
+  if (mouseIsPressed && mouseButton === LEFT) {
+    gameObject.selected = []
+    push();
+    stroke(green);
+    noFill();
+    line(gameObject.waypointX, gameObject.waypointY, mouseX, mouseY)
+    line(gameObject.waypointX, gameObject.waypointY, gameObject.waypointX, mouseY)
+    line(gameObject.waypointX, gameObject.waypointY, mouseX, gameObject.waypointY)
+    line(mouseX, mouseY, gameObject.waypointX, mouseY) //x line
+    line(mouseX, mouseY, mouseX, gameObject.waypointY) //y line
+    pop();
+
+    //loop thru the world array. If i faction === 'friendly'
+    //AND x is between waypointX mouseX
+    for (let i = 0; i < gameObject.world.length; i++) {
+      const obj = gameObject.world[i];
+
+      //  && obj.x > mouseX - gameObject.waypointX && obj.x < mouseX + gameObject.waypointX
+
+
+      if (obj.faction === 'friendly') {
+
+        if ((obj.x > mouseX && obj.x < gameObject.waypointX) || (obj.x < mouseX && obj.x > gameObject.waypointX))
+          
+        if ((obj.y > mouseY && obj.y < gameObject.waypointY) || (obj.y < mouseY && obj.y > gameObject.waypointY)){
+        // gameObject.waypointX=gameObject.prevWaypointX
+        //  gameObject.waypointY=gameObject.prevWaypointY
+          gameObject.selected.push(obj)
+        }
+      }
+    }
+  }
+  //prevent default
+  return false;
 }
 
 function getWaypoint() {
+  if (mouseIsPressed && mouseButton === RIGHT) {
+    gameObject.selected = []
+  }
+
   gameObject.prevWaypointX = gameObject.waypointX;
   gameObject.prevWaypointY = gameObject.waypointY;
   gameObject.waypointX = mouseX;
   gameObject.waypointY = mouseY;
   waypointTimestamp = new Date().getTime()
+console.log("waypoint x: " + gameObject.waypointX)
+console.log("waypoint y: " + gameObject.waypointY)
+  for (let i = 0; i < gameObject.selected.length; i++) {
+    gameObject.selected[i].waypointX = gameObject.waypointX 
+    gameObject.selected[i].waypointY = gameObject.waypointY
+  }
+
+
 }
 
 
